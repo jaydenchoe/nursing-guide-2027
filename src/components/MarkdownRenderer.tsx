@@ -103,7 +103,9 @@ export default function MarkdownRenderer({ content }: { content: string }) {
             </pre>
           ),
         }}
-      />
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
