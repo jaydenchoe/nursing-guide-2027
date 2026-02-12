@@ -7,7 +7,7 @@ export default function MarkdownRenderer({ content }: { content: string }) {
   return (
     <div className="prose prose-slate max-w-none">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[[remarkGfm, { singleTilde: false }]]}
         components={{
           h1: ({ children }) => (
             <h1 className="text-3xl font-bold text-slate-900 mb-6 pb-3 border-b-2 border-emerald-200">
