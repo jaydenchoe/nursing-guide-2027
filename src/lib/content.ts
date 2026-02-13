@@ -161,3 +161,10 @@ export function getStrategy(): string {
     "utf-8"
   );
 }
+
+export function getStudentProfile(): string {
+  return fs.readFileSync(
+    path.join(contentDir, "최유민_학생_프로필.md"),
+    "utf-8"
+  );
+}

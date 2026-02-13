@@ -150,6 +150,7 @@ export default function Sidebar({ universities }: SidebarProps) {
           <NavLink href="/strategy" icon="🎯">최적 입시 전략</NavLink>
           <NavLink href="/overview/4year" icon="🏫">4년제 대학 개요</NavLink>
           <NavLink href="/overview/college" icon="📚">전문대학 개요</NavLink>
+          <NavLink href="/profile" icon="👩‍🎓">유민이 프로필</NavLink>
         </div>
 
         <div className="border-t border-slate-200 pt-3 mb-2">
