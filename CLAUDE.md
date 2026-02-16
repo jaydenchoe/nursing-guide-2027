@@ -13,10 +13,6 @@
 
 이 웹사이트는 가족 전용으로 운영되며 외부에 공개하지 않는다. 따라서 학생 이름(최유민)과 자택 주소와 성적 등 개인정보가 콘텐츠에 포함되어 있어도 프라이버시 문제가 없다. 최유민 학생 프로필 파일을 포함한 모든 콘텐츠를 GitHub 저장소에 푸시하고 웹사이트에 게시해도 된다.
 
-### 학생 프로필 참조 규칙
-
-최유민 학생의 개인 정보(이름/나이/주소/학력/성적/입시 목표 등)가 필요한 작업을 할 때는 반드시 `src/content/최유민_학생_프로필.md` 파일을 먼저 읽어서 최신 데이터를 참조해야 한다. 콘텐츠를 새로 작성하거나 기존 문서를 수정할 때 학생 정보가 이 프로필 파일과 일치하도록 유지해야 하며 프로필에 없는 정보를 임의로 추정하지 않는다.
-
 ---
 
 ## 핵심 정보 (반드시 숙지)
@@ -35,7 +31,7 @@
 
 ### GitHub 인증 (Push 방법)
 - Fine-grained Personal Access Token 사용
-- **현재 유효한 토큰 (2026-02-12 발급)**: `<PAT_TOKEN>`
+- **현재 유효한 토큰**: 워크스페이스의 CLAUDE.md 참조 (GitHub Push Protection으로 인해 저장소에는 토큰을 포함하지 않음)
 - Push 명령어: `git push https://<PAT_TOKEN>@github.com/jaydenchoe/nursing-guide-2027.git main`
 - 토큰 관리 페이지: https://github.com/settings/personal-access-tokens
 - 주의: 토큰은 만료될 수 있으므로 push 실패 시 사용자에게 새 토큰 생성을 요청해야 한다
@@ -67,7 +63,6 @@ nursing-guide-2027/
 │   │   ├── page.tsx        # 메인 페이지
 │   │   ├── globals.css     # 글로벌 스타일
 │   │   ├── overview/       # 학교 목록 총괄 페이지
-│   │   ├── profile/        # 유민이 프로필 페이지
 │   │   ├── strategy/       # 입시 전략 페이지
 │   │   └── university/
 │   │       └── [slug]/
@@ -327,7 +322,6 @@ cd /tmp/nursing-repo
 cp -r <워크스페이스>/4년제_대학/* src/content/4년제_대학/
 cp -r <워크스페이스>/전문대학/* src/content/전문대학/
 cp <워크스페이스>/README.md src/content/README.md
-cp <워크스페이스>/최유민_학생_프로필.md src/content/최유민_학생_프로필.md
 cp <워크스페이스>/최적_입시_전략.md src/content/최적_입시_전략.md
 ```
 
@@ -381,24 +375,71 @@ npm run build
 
 ---
 
+## 외부 데이터 소스: 어디가(adiga.kr)
+
+대입정보포털 "어디가"(https://www.adiga.kr)는 한국대학교육협의회(대교협)가 운영하는 공식 대입 정보 사이트이다. 44개 학교의 전형 데이터를 보충하거나 최신화할 때 이 사이트를 참조해야 한다.
+
+### 로그인 정보
+- URL: https://www.adiga.kr
+- 계정: netray (학부모 최재훈)
+- 비밀번호: 브라우저에 저장되어 있음
+- 로그인 페이지: `/mbs/log/mbsLogView.do?menuId=PCMBSLOG1000`
+
+### 주요 메뉴별 URL 패턴
+
+| 메뉴 | URL | 로그인 | 설명 |
+|---|---|---|---|
+| 전형정보 | `/ucp/prc/uni/admssUnivView.do?menuId=PCPRCINF2000` | 불필요 | 대학별/학과별 전형 목록 + 경쟁률 + 등급컷 |
+| 대학정보 | `/ucp/uvt/uni/univView.do?menuId=PCUVTINF2000` | 불필요 | 대학 기본정보 + 설치학과 + 모집인원 |
+| 대학 상세 | `/ucp/uvt/uni/univDetail.do?menuId=PCUVTINF2000&unvCd={대학코드}&searchSyr=2026` | 불필요 | 대학 상세 페이지 |
+| 평가기준 | `/ucp/uvt/uni/univDetailSelection.do?menuId=PCUVTINF2000&unvCd={대학코드}&searchSyr=2026` | 불필요 | 전형평가기준 및 입시결과 (전년 대비 변경사항 포함) |
+| 학과정보 | `/ucp/cls/uni/classUnivView.do?menuId=PCCLSINF2000` | 불필요 | 학과별 상세 정보 |
+| 대학성적분석 | `/sco/agu/univScoScaAnlsView.do?menuId=PCSCOAGU2000` | 필수 | 학생 성적 기반 합격 가능성 분석 |
+
+### AJAX API 엔드포인트
+- `admssUnivGroupAjax.do` (POST) - 대학 그룹 데이터 조회
+- `admssUnivAjax.do` (POST) - 대학별 전형 데이터 조회 (전형정보 목록의 확장 행 데이터)
+
+### 알려진 대학코드 (`unvCd` 파라미터)
+- 가천대학교: `0000063`
+- 나머지 학교의 대학코드는 대학정보 메뉴에서 검색 후 URL에서 확인 가능
+
+### 전형정보 검색 방법
+1. 전형정보 페이지(`PCPRCINF2000`)에서 "일반대학" 또는 "전문대학" 탭 선택
+2. 대학명 검색란에 학교명 입력 후 검색 아이콘 클릭
+3. 결과 목록에서 간호학과 행의 ▼ 버튼 클릭하여 전형별 상세 펼침
+4. 전형별 경쟁률/모집인원/등급컷(70%컷 또는 90%컷) 확인 가능
+
+### 수집 가능한 데이터와 기존 콘텐츠 보강 포인트
+- 전형별 경쟁률 (2025학년도 기준): 기존 콘텐츠에 누락된 학교 보충
+- 등급컷 (70%/90% 기준): 기존 합격선 데이터 정밀화
+- 전형방법 변경사항 (2026 vs 2025): 학생부 반영방법/수능 반영비율 변경 추적
+- 모집요강 PDF: 대학정보 상세 페이지에서 시행계획/수시/정시/재외국민 PDF 다운로드 가능
+
+### 사이트 이용 시 주의사항
+- JavaScript가 매우 무거워서 브라우저 타임아웃(30초)이 자주 발생한다. 학과 전체 필터링(간호학과 카테고리 선택) 시 특히 심하므로 대학별 개별 검색을 권장한다.
+- 대학성적분석 기능은 학생 성적(학생부 또는 수능/모의고사)이 입력되어야 작동한다. 성적 입력은 "학생부입력" 또는 "성적관리" 메뉴에서 한다.
+- 상세 수집 보고서 파일: `간호학과_입시_요약/adiga_data_collection.md` (가천대 샘플 데이터 포함)
+
+---
+
 ## 커밋 히스토리 (참고)
 
 가장 최근 커밋부터:
 
-1. `9c910d2` - Replace commute times with straight-line distances and add student profile page
-2. `1067d45` - Replace 서울대 with 인하대 in strategy page (비현실적이므로 제거)
-3. `554c291` - Fix strikethrough: disable single tilde in remark-gfm
-4. `7f5e6cf` - Add commute times, employment rates, and home-based strategy data (48 files)
-5. `058ff7d` - Add admission results, tuition, dormitory, history and reputation to all 44 schools
-6. `563e815` - Fill in admission data for all 44 nursing schools
-7. `bafa3e9` - Unify overview table columns across 4-year and college pages
-8. `1be7181` - Unify overview table fields and fix hospital data
-9. `44f10b9` - Fix hospital affiliation data for 10 universities
-10. `3cac0eb` - Fix MarkdownRenderer: pass content as children
-11. `2e68ab4` - Use ASCII slugs for university URLs (Vercel CDN cannot serve files with Korean filenames)
-12. `7c12d50` - Restore static export config to fix Korean URL 404 errors
-13. `e2cbc91` - Remove static export config for Vercel deployment
-14. `349b562` - Initial commit: nursing guide website
+1. `1067d45` - Replace 서울대 with 인하대 in strategy page (비현실적이므로 제거)
+2. `554c291` - Fix strikethrough: disable single tilde in remark-gfm
+3. `7f5e6cf` - Add commute times, employment rates, and home-based strategy data (48 files)
+4. `058ff7d` - Add admission results, tuition, dormitory, history and reputation to all 44 schools
+5. `563e815` - Fill in admission data for all 44 nursing schools
+6. `bafa3e9` - Unify overview table columns across 4-year and college pages
+7. `1be7181` - Unify overview table fields and fix hospital data
+8. `44f10b9` - Fix hospital affiliation data for 10 universities
+9. `3cac0eb` - Fix MarkdownRenderer: pass content as children
+10. `2e68ab4` - Use ASCII slugs for university URLs (Vercel CDN cannot serve files with Korean filenames)
+11. `7c12d50` - Restore static export config to fix Korean URL 404 errors
+12. `e2cbc91` - Remove static export config for Vercel deployment
+13. `349b562` - Initial commit: nursing guide website
 
 ---
 
@@ -420,4 +461,4 @@ git push https://<TOKEN>@github.com/jaydenchoe/nursing-guide-2027.git main
 
 ---
 
-*이 문서는 2026-02-13에 마지막으로 업데이트되었다. 프로젝트 구조나 배포 방식이 변경되면 이 문서도 업데이트해야 한다.*
+*이 문서는 2026-02-16에 마지막으로 업데이트되었다. 프로젝트 구조나 배포 방식이 변경되면 이 문서도 업데이트해야 한다.*
